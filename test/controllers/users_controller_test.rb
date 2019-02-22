@@ -64,5 +64,23 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     end
     assert_redirected_to root_url
   end
+  
+  test "should show only activated users in index page" do
+    log_in_as(@user)
+    get users_path
+    assert_select "a[href=?]", user_path(@other_user)
+    @other_user.update_columns(activated: false, activated_at: Time.zone.now)    
+    get users_path
+    assert_select "a[href=?]", user_path(@other_user), count: 0
+    
+  end
+  
+  test "should show only activated user in show page" do
+    get user_path(@user)
+    assert_template 'users/show'
+    @user.update_columns(activated: false, activated_at: Time.zone.now)
+    get user_path(@user)
+    assert_redirected_to root_url
+  end
 
 end
